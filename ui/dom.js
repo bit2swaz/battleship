@@ -171,3 +171,9 @@ export function showWinScreen(winner) {
     overlay.appendChild(content);
     document.body.appendChild(overlay);
 }
+
+export function createGameContainer() {
+    const container = document.createElement('div');
+    container.classList.add('game-container');
+    return container;
+}
