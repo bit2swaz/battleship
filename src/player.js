@@ -93,28 +93,39 @@ export class Player {
   }
   
   attack(x, y) {
-    try {
-      return this.targetBoard.receiveAttack(x, y);
-    } catch (error) {
-      console.error(error);
+    // Don't try to attack positions we've already attacked
+    const posKey = `${x},${y}`;
+    if (this.isComputer && this.attackedPositions.has(posKey)) {
       return null;
     }
+    
+    const result = this.targetBoard.receiveAttack(x, y);
+    
+    // Mark as attacked for computer player
+    if (this.isComputer && result !== null) {
+      this.attackedPositions.add(posKey);
+    }
+    
+    return result;
   }
   
   makeRandomAttack() {
-    let x, y;
+    // Try to use potential moves from previous hits first
     let move;
     
     if (this.lastHit && this.potentialMoves.length > 0) {
-      // Try adjacent positions to last hit
-      move = this.potentialMoves.pop();
+      // Filter out any invalid moves
+      this.potentialMoves = this.potentialMoves.filter(([x, y]) => this.isValidMove(x, y));
+      
+      if (this.potentialMoves.length > 0) {
+        move = this.potentialMoves.pop();
+      } else {
+        // No valid potential moves, make a random move
+        move = this.getRandomValidMove();
+      }
     } else {
       // Make a random move
-      do {
-        x = Math.floor(Math.random() * this.BOARD_SIZE);
-        y = Math.floor(Math.random() * this.BOARD_SIZE);
-      } while (this.attackedPositions.has(`${x},${y}`));
-      move = [x, y];
+      move = this.getRandomValidMove();
     }
     
     const [moveX, moveY] = move;
@@ -128,6 +139,35 @@ export class Player {
     }
     
     return move;
+  }
+  
+  getRandomValidMove() {
+    let x, y;
+    let attempts = 0;
+    const maxAttempts = 100; // Safety limit
+    
+    do {
+      x = Math.floor(Math.random() * this.BOARD_SIZE);
+      y = Math.floor(Math.random() * this.BOARD_SIZE);
+      attempts++;
+      
+      if (attempts > maxAttempts) {
+        // Fallback: scan the board for any valid move
+        for (let scanX = 0; scanX < this.BOARD_SIZE; scanX++) {
+          for (let scanY = 0; scanY < this.BOARD_SIZE; scanY++) {
+            if (this.isValidMove(scanX, scanY)) {
+              return [scanX, scanY];
+            }
+          }
+        }
+        console.error("No valid moves found on the board");
+        // Emergency fallback - return a random position
+        return [Math.floor(Math.random() * this.BOARD_SIZE), 
+                Math.floor(Math.random() * this.BOARD_SIZE)];
+      }
+    } while (!this.isValidMove(x, y));
+    
+    return [x, y];
   }
   
   getAdjacentMoves(x, y) {

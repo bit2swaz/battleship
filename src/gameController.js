@@ -93,10 +93,26 @@ export class GameController {
     computerAttack() {
         if (this.placementPhase || this.playerTurn) return null;
 
-        const [x, y] = this.computer.makeRandomAttack();
-        this.lastComputerAttackResult = this.playerBoard.receiveAttack(x, y);
+        // Maximum number of attempts to avoid infinite loop
+        const maxAttempts = 100;
+        let attempts = 0;
+        
+        while (attempts < maxAttempts) {
+            attempts++;
+            const [x, y] = this.computer.makeRandomAttack();
+            this.lastComputerAttackResult = this.playerBoard.receiveAttack(x, y);
+            
+            if (this.lastComputerAttackResult !== null) {
+                this.playerTurn = true;
+                return [x, y];
+            }
+        }
+        
+        console.error("Maximum computer attack attempts reached");
+        // Emergency fallback - just switch turns
         this.playerTurn = true;
-        return [x, y];
+        this.lastComputerAttackResult = "miss";
+        return [0, 0];
     }
 
     getLastComputerAttackResult() {

@@ -50,12 +50,12 @@ export const createGameboard = () => {
 
     receiveAttack(x, y) {
       if (!isValidPosition(x, y)) {
-        throw new Error('Invalid position');
+        return null; // Invalid position
       }
 
       const posKey = `${x},${y}`;
       if (attackedPositions.has(posKey)) {
-        throw new Error('Position already attacked');
+        return null; // Already attacked
       }
       
       attackedPositions.add(posKey);
