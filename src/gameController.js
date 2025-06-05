@@ -7,7 +7,7 @@ export class GameController {
         this.playerBoard = new Gameboard();
         this.computerBoard = new Gameboard();
         this.player = new Player(this.computerBoard);
-        this.computer = new Player(this.playerBoard);
+        this.computer = new Player(this.playerBoard, true);
         this.currentShip = null;
         this.shipOrientation = 'horizontal';
         this.placementPhase = true;

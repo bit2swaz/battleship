@@ -74,3 +74,74 @@ export const createComputerPlayer = () => {
     }
   };
 };
+
+/**
+ * Player class that combines both human and computer player functionality
+ */
+export class Player {
+  constructor(targetBoard, isComputer = false) {
+    this.targetBoard = targetBoard;
+    this.isComputer = isComputer;
+    
+    // Computer player properties
+    if (isComputer) {
+      this.BOARD_SIZE = 10;
+      this.attackedPositions = new Set();
+      this.lastHit = null;
+      this.potentialMoves = [];
+    }
+  }
+  
+  attack(x, y) {
+    try {
+      return this.targetBoard.receiveAttack(x, y);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+  
+  makeRandomAttack() {
+    let x, y;
+    let move;
+    
+    if (this.lastHit && this.potentialMoves.length > 0) {
+      // Try adjacent positions to last hit
+      move = this.potentialMoves.pop();
+    } else {
+      // Make a random move
+      do {
+        x = Math.floor(Math.random() * this.BOARD_SIZE);
+        y = Math.floor(Math.random() * this.BOARD_SIZE);
+      } while (this.attackedPositions.has(`${x},${y}`));
+      move = [x, y];
+    }
+    
+    const [moveX, moveY] = move;
+    this.attackedPositions.add(`${moveX},${moveY}`);
+    
+    // Update last hit and potential moves if this was a hit
+    const result = this.attack(moveX, moveY);
+    if (result === 'hit') {
+      this.lastHit = [moveX, moveY];
+      this.potentialMoves = this.getAdjacentMoves(moveX, moveY);
+    }
+    
+    return move;
+  }
+  
+  getAdjacentMoves(x, y) {
+    return [
+      [x + 1, y],
+      [x - 1, y],
+      [x, y + 1],
+      [x, y - 1]
+    ].filter(([x, y]) => this.isValidMove(x, y));
+  }
+  
+  isValidMove(x, y) {
+    return x >= 0 && x < this.BOARD_SIZE && 
+           y >= 0 && y < this.BOARD_SIZE && 
+           !this.attackedPositions.has(`${x},${y}`);
+  }
+}

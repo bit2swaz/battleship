@@ -83,3 +83,17 @@ export const createGameboard = () => {
     }
   };
 };
+
+/**
+ * Gameboard class that wraps the factory function
+ */
+export class Gameboard {
+  constructor() {
+    const gameboard = createGameboard();
+    
+    // Copy all methods from the factory function
+    for (const key in gameboard) {
+      this[key] = gameboard[key];
+    }
+  }
+}

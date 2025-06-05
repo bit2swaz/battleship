@@ -26,3 +26,20 @@ export const createShip = (length) => {
     }
   };
 };
+
+/**
+ * Ship class that wraps the factory function
+ */
+export class Ship {
+  constructor(length) {
+    const ship = createShip(length);
+    
+    // Copy all properties from the factory function
+    this.length = ship.length;
+    
+    // Copy all methods from the factory function
+    this.hit = ship.hit;
+    this.getHits = ship.getHits;
+    this.isSunk = ship.isSunk;
+  }
+}
