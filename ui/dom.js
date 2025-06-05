@@ -4,157 +4,170 @@
  * @param {boolean} isEnemy - If true, this is the enemy's board
  * @returns {HTMLElement} The created board element
  */
-export const createBoardGrid = (playerId, isEnemy) => {
-  const board = document.createElement('div');
-  board.id = playerId;
-  board.className = 'game-board';
-  board.style.cssText = `
-    display: grid;
-    grid-template-columns: repeat(10, 40px);
-    gap: 2px;
-    margin: 20px;
-  `;
+export function createGameBoard(player, onClick) {
+    const board = document.createElement('div');
+    board.classList.add('game-board');
+    board.dataset.player = player;
 
-  for (let y = 0; y < 10; y++) {
-    for (let x = 0; x < 10; x++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.dataset.x = x;
-      cell.dataset.y = y;
-      cell.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border: 1px solid #ccc;
-        background: #fff;
-        cursor: pointer;
-      `;
-      board.appendChild(cell);
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = `repeat(10, var(--grid-cell-size))`;
+    grid.style.gap = 'var(--grid-gap)';
+    grid.classList.add('grid');
+
+    for (let i = 0; i < 100; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.style.width = 'var(--grid-cell-size)';
+        cell.style.height = 'var(--grid-cell-size)';
+        cell.dataset.index = i;
+        cell.addEventListener('click', () => onClick(i));
+        grid.appendChild(cell);
     }
-  }
 
-  return board;
-};
+    const label = document.createElement('h2');
+    label.textContent = `${player}'s Board`;
+    label.style.marginBottom = '1rem';
+    label.style.textAlign = 'center';
+    label.style.fontFamily = 'Orbitron, sans-serif';
+
+    board.appendChild(label);
+    board.appendChild(grid);
+    return board;
+}
 
 /**
  * Updates a cell's appearance based on game state
  * @param {HTMLElement} cell - The cell to update
  * @param {string} state - 'hit', 'miss', or 'ship'
  */
-export const updateCell = (cell, state) => {
-  cell.classList.remove('hit', 'miss', 'ship');
-  cell.classList.add(state);
+export function updateCell(boardElement, index, state) {
+    const cell = boardElement.querySelector(`[data-index="${index}"]`);
+    if (!cell) return;
 
-  switch (state) {
-    case 'hit':
-      cell.style.backgroundColor = '#ff4444';
-      break;
-    case 'miss':
-      cell.style.backgroundColor = '#cccccc';
-      break;
-    case 'ship':
-      cell.style.backgroundColor = '#666666';
-      break;
-  }
-};
+    cell.classList.remove('ship', 'hit', 'miss');
+    
+    if (state === 'ship') {
+        cell.classList.add('ship');
+    } else if (state === 'hit') {
+        cell.classList.add('hit');
+    } else if (state === 'miss') {
+        cell.classList.add('miss');
+    }
+}
 
 /**
  * Shows a message to the player
  * @param {string} message - The message to display
  * @param {string} type - 'info', 'success', or 'error'
  */
-export const showMessage = (message, type = 'info') => {
-  const messageDiv = document.getElementById('message') || document.createElement('div');
-  messageDiv.id = 'message';
-  messageDiv.textContent = message;
-  messageDiv.className = `message ${type}`;
-  messageDiv.style.cssText = `
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    border-radius: 5px;
-    background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
-    color: white;
-    z-index: 1000;
-  `;
+export function showMessage(message, isError = false) {
+    const container = document.createElement('div');
+    container.classList.add('message');
+    container.style.padding = '1rem';
+    container.style.marginBottom = '1rem';
+    container.style.borderRadius = '5px';
+    container.style.backgroundColor = isError ? '#ff4444' : 'var(--accent-primary)';
+    container.style.color = 'var(--text-primary)';
+    container.style.textAlign = 'center';
+    container.style.fontFamily = 'Orbitron, sans-serif';
+    container.textContent = message;
+    
+    const app = document.getElementById('app');
+    app.insertBefore(container, app.firstChild);
 
-  if (!messageDiv.parentElement) {
-    document.body.appendChild(messageDiv);
-  }
-
-  setTimeout(() => {
-    messageDiv.remove();
-  }, 3000);
-};
+    setTimeout(() => {
+        container.style.opacity = '0';
+        container.style.transition = 'opacity 0.3s ease-out';
+        setTimeout(() => container.remove(), 300);
+    }, 3000);
+}
 
 /**
  * Creates the ship placement interface
  * @param {Array} ships - Array of ship objects with length and name
  * @returns {HTMLElement} The ship placement interface
  */
-export const createShipPlacementInterface = (ships) => {
-  const container = document.createElement('div');
-  container.className = 'ship-placement';
-  container.style.cssText = `
-    padding: 20px;
-    background: #f5f5f5;
-    border-radius: 5px;
-    margin: 20px;
-  `;
+export function createShipPlacement(onOrientationToggle, onShipSelect) {
+    const container = document.createElement('div');
+    container.classList.add('ship-placement');
 
-  const orientationToggle = document.createElement('button');
-  orientationToggle.textContent = 'Rotate Ship';
-  orientationToggle.className = 'orientation-toggle';
-  container.appendChild(orientationToggle);
+    const title = document.createElement('h2');
+    title.textContent = 'Place Your Ships';
+    title.style.marginBottom = '1rem';
+    title.style.fontFamily = 'Orbitron, sans-serif';
+    title.style.textAlign = 'center';
 
-  const shipList = document.createElement('div');
-  shipList.className = 'ship-list';
-  ships.forEach(ship => {
-    const shipElement = document.createElement('div');
-    shipElement.className = 'ship-item';
-    shipElement.textContent = `${ship.name} (${ship.length})`;
-    shipElement.dataset.length = ship.length;
-    shipList.appendChild(shipElement);
-  });
-  container.appendChild(shipList);
+    const orientationBtn = document.createElement('button');
+    orientationBtn.classList.add('orientation-toggle');
+    orientationBtn.textContent = 'Rotate Ship';
+    orientationBtn.addEventListener('click', onOrientationToggle);
 
-  return container;
-};
+    const shipList = document.createElement('div');
+    shipList.classList.add('ship-list');
+
+    const ships = [
+        { name: 'Carrier', length: 5 },
+        { name: 'Battleship', length: 4 },
+        { name: 'Cruiser', length: 3 },
+        { name: 'Submarine', length: 3 },
+        { name: 'Destroyer', length: 2 }
+    ];
+
+    ships.forEach(ship => {
+        const shipItem = document.createElement('div');
+        shipItem.classList.add('ship-item');
+        shipItem.textContent = `${ship.name} (${ship.length})`;
+        shipItem.addEventListener('click', () => onShipSelect(ship.length));
+        shipList.appendChild(shipItem);
+    });
+
+    container.appendChild(title);
+    container.appendChild(orientationBtn);
+    container.appendChild(shipList);
+    return container;
+}
 
 /**
  * Shows the game over screen
  * @param {string} winner - 'player' or 'computer'
  */
-export const showGameOver = (winner) => {
-  const overlay = document.createElement('div');
-  overlay.className = 'game-over';
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  `;
+export function showWinScreen(winner) {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';
 
-  const message = document.createElement('div');
-  message.style.cssText = `
-    background: white;
-    padding: 40px;
-    border-radius: 10px;
-    text-align: center;
-  `;
-  message.innerHTML = `
-    <h2>Game Over!</h2>
-    <p>${winner === 'player' ? 'Congratulations! You won!' : 'Computer wins! Better luck next time!'}</p>
-    <button onclick="location.reload()">Play Again</button>
-  `;
+    const content = document.createElement('div');
+    content.style.backgroundColor = 'var(--bg-secondary)';
+    content.style.padding = '2rem';
+    content.style.borderRadius = '10px';
+    content.style.textAlign = 'center';
+    content.style.animation = 'slideDown 0.5s ease-out';
 
-  overlay.appendChild(message);
-  document.body.appendChild(overlay);
-};
+    const title = document.createElement('h2');
+    title.textContent = `${winner} Wins!`;
+    title.style.color = 'var(--accent-secondary)';
+    title.style.fontFamily = 'Orbitron, sans-serif';
+    title.style.fontSize = '2.5rem';
+    title.style.marginBottom = '1rem';
+
+    const playAgainBtn = document.createElement('button');
+    playAgainBtn.textContent = 'Play Again';
+    playAgainBtn.classList.add('orientation-toggle');
+    playAgainBtn.addEventListener('click', () => {
+        window.location.reload();
+    });
+
+    content.appendChild(title);
+    content.appendChild(playAgainBtn);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+}

@@ -1,0 +1,253 @@
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --accent-primary: #0f3460;
+  --accent-secondary: #e94560;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --grid-cell-size: 40px;
+  --grid-gap: 2px;
+  --transition-speed: 0.3s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header Styles */
+header {
+  background-color: var(--bg-secondary);
+  padding: 2rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 0.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 10px var(--accent-secondary);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Wave Animation */
+.waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: url('data:image/svg+xml,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg"><path d="M0 0v46.29c47.79 22.2 103.59 32.17 158 28 70.36-5.37 136.33-33.31 206.8-37.5 73.84-4.36 147.54 16.88 218.2 35.26 69.27 18.17 138.3 24.42 209.4 13.08 36.15-5.74 72.02-17.24 107.86-27.14 59.73-16.48 113.28-41.79 169.9-49.37 60.28-8.07 122.57 5.47 172.84 34.35V0z"/></svg>') no-repeat;
+  background-size: 1200px 100px;
+  opacity: 0.2;
+}
+
+.wave:nth-child(1) {
+  animation: wave 30s linear infinite;
+  z-index: 3;
+  opacity: 0.2;
+}
+
+.wave:nth-child(2) {
+  animation: wave 25s linear infinite reverse;
+  z-index: 2;
+  opacity: 0.1;
+}
+
+.wave:nth-child(3) {
+  animation: wave 20s linear infinite;
+  z-index: 1;
+  opacity: 0.05;
+}
+
+/* Main Content */
+main {
+  flex: 1;
+  padding: 2rem;
+}
+
+#app {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Game Boards */
+.game-board {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-speed);
+}
+
+.game-board:hover {
+  transform: translateY(-5px);
+}
+
+.cell {
+  background: var(--accent-primary);
+  border-radius: 4px;
+  transition: all var(--transition-speed);
+  position: relative;
+  overflow: hidden;
+}
+
+.cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px var(--accent-secondary);
+}
+
+.cell.ship {
+  background: var(--accent-secondary);
+}
+
+.cell.hit {
+  background: #ff4444;
+  animation: explosion 0.5s ease-out;
+}
+
+.cell.miss {
+  background: var(--text-secondary);
+  animation: ripple 1s ease-out;
+}
+
+/* Ship Placement Interface */
+.ship-placement {
+  background-color: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.orientation-toggle {
+  background-color: var(--accent-primary);
+  color: var(--text-primary);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  transition: all var(--transition-speed);
+}
+
+.orientation-toggle:hover {
+  background-color: var(--accent-secondary);
+  transform: scale(1.05);
+}
+
+.ship-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ship-item {
+  background-color: var(--accent-primary);
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.ship-item:hover {
+  background-color: var(--accent-secondary);
+  transform: scale(1.05);
+}
+
+/* Message Styles */
+.message {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Footer */
+footer {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: var(--accent-secondary);
+  text-decoration: none;
+  transition: color var(--transition-speed);
+}
+
+footer a:hover {
+  color: var(--text-primary);
+}
+
+/* Animations */
+@keyframes glow {
+  from {
+    text-shadow: 0 0 5px var(--accent-secondary),
+                 0 0 10px var(--accent-secondary),
+                 0 0 15px var(--accent-primary);
+  }
+  to {
+    text-shadow: 0 0 10px var(--accent-secondary),
+                 0 0 20px var(--accent-secondary),
+                 0 0 30px var(--accent-primary);
+  }
+}
+
+@keyframes wave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-1200px); }
+}
+
+@keyframes explosion {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  .game-board {
+    margin: 1rem 0;
+  }
+
+  #app {
+    padding: 1rem;
+  }
+} 

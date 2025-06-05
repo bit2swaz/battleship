@@ -4,20 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Battleship</title>
-    <style>
-        #app {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app"></div>
+    <header>
+        <h1>BATTLESHIP</h1>
+        <div class="waves">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+    </header>
+
+    <main>
+        <div id="app"></div>
+    </main>
+
+    <footer>
+        <p>Made with ❤️ by <a href="https://github.com/bit2swaz" target="_blank" rel="noopener noreferrer">bit2swaz</a></p>
+    </footer>
+
     <script type="module" src="../ui/index.js"></script>
 </body>
 </html> 
