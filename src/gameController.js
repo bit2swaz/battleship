@@ -1,94 +1,114 @@
-import { createPlayer, createComputerPlayer } from './player.js';
-import { createGameboard } from './gameboard.js';
-import { createShip } from './ship.js';
+import { Ship } from './ship.js';
+import { Gameboard } from './gameboard.js';
+import { Player } from './player.js';
 
-export const createGameController = () => {
-  const player = createPlayer('Human');
-  const computer = createComputerPlayer();
-  const playerBoard = createGameboard();
-  const computerBoard = createGameboard();
-  let currentPlayer = player;
-  let gameOver = false;
+export class GameController {
+    constructor() {
+        this.playerBoard = new Gameboard();
+        this.computerBoard = new Gameboard();
+        this.player = new Player(this.computerBoard);
+        this.computer = new Player(this.playerBoard);
+        this.currentShip = null;
+        this.shipOrientation = 'horizontal';
+        this.placementPhase = true;
+        this.playerTurn = true;
+        this.lastComputerAttackResult = null;
+        
+        this.ships = [
+            { length: 5, name: 'Carrier' },
+            { length: 4, name: 'Battleship' },
+            { length: 3, name: 'Cruiser' },
+            { length: 3, name: 'Submarine' },
+            { length: 2, name: 'Destroyer' }
+        ];
+        
+        this.placedShips = 0;
+    }
 
-  const standardShips = [
-    { length: 5, name: 'Carrier' },
-    { length: 4, name: 'Battleship' },
-    { length: 3, name: 'Cruiser' },
-    { length: 3, name: 'Submarine' },
-    { length: 2, name: 'Destroyer' }
-  ];
+    initialize() {
+        // Place computer ships randomly
+        this.ships.forEach(shipInfo => {
+            let placed = false;
+            while (!placed) {
+                const x = Math.floor(Math.random() * 10);
+                const y = Math.floor(Math.random() * 10);
+                const horizontal = Math.random() < 0.5;
+                
+                const ship = new Ship(shipInfo.length);
+                placed = this.computerBoard.placeShip(ship, x, y, horizontal);
+            }
+        });
+    }
 
-  const placeComputerShips = () => {
-    standardShips.forEach(shipInfo => {
-      const ship = createShip(shipInfo.length);
-      let placed = false;
-      
-      while (!placed) {
-        const x = Math.floor(Math.random() * 10);
-        const y = Math.floor(Math.random() * 10);
-        const orientation = Math.random() < 0.5 ? 'horizontal' : 'vertical';
-        placed = computerBoard.placeShip(ship, x, y, orientation);
-      }
-    });
-  };
+    isPlacementPhase() {
+        return this.placementPhase;
+    }
 
-  return {
-    placePlayerShip(ship, x, y, orientation) {
-      return playerBoard.placeShip(ship, x, y, orientation);
-    },
+    isPlayerTurn() {
+        return this.playerTurn;
+    }
 
-    startGame() {
-      placeComputerShips();
-      currentPlayer = player;
-      gameOver = false;
-    },
+    setCurrentShip(length) {
+        this.currentShip = new Ship(length);
+    }
+
+    toggleShipOrientation() {
+        this.shipOrientation = this.shipOrientation === 'horizontal' ? 'vertical' : 'horizontal';
+        return this.shipOrientation;
+    }
+
+    placePlayerShip(x, y) {
+        if (!this.currentShip) return false;
+
+        const placed = this.playerBoard.placeShip(
+            this.currentShip,
+            x,
+            y,
+            this.shipOrientation === 'horizontal'
+        );
+
+        if (placed) {
+            this.placedShips++;
+            this.currentShip = null;
+
+            if (this.placedShips === this.ships.length) {
+                this.placementPhase = false;
+            }
+        }
+
+        return placed;
+    }
 
     playerAttack(x, y) {
-      if (gameOver || currentPlayer !== player) {
-        return false;
-      }
+        if (this.placementPhase || !this.playerTurn) return null;
 
-      const result = player.attack(computerBoard, x, y);
-      if (computerBoard.allShipsSunk()) {
-        gameOver = true;
-        return { result, gameOver: true, winner: 'player' };
-      }
+        const result = this.player.attack(x, y);
+        if (result) {
+            this.playerTurn = false;
+            return result;
+        }
+        return null;
+    }
 
-      currentPlayer = computer;
-      return { result, gameOver: false };
-    },
+    computerAttack() {
+        if (this.placementPhase || this.playerTurn) return null;
 
-    computerPlay() {
-      if (gameOver || currentPlayer !== computer) {
-        return false;
-      }
+        const [x, y] = this.computer.makeRandomAttack();
+        this.lastComputerAttackResult = this.playerBoard.receiveAttack(x, y);
+        this.playerTurn = true;
+        return [x, y];
+    }
 
-      const [x, y] = computer.makeRandomMove(playerBoard);
-      const result = computer.attack(playerBoard, x, y);
-      
-      if (playerBoard.allShipsSunk()) {
-        gameOver = true;
-        return { x, y, result, gameOver: true, winner: 'computer' };
-      }
-
-      currentPlayer = player;
-      return { x, y, result, gameOver: false };
-    },
-
-    getCurrentPlayer() {
-      return currentPlayer === player ? 'player' : 'computer';
-    },
+    getLastComputerAttackResult() {
+        return this.lastComputerAttackResult;
+    }
 
     isGameOver() {
-      return gameOver;
-    },
-
-    getPlayerBoard() {
-      return playerBoard;
-    },
-
-    getComputerBoard() {
-      return computerBoard;
+        return this.playerBoard.allShipsSunk() || this.computerBoard.allShipsSunk();
     }
-  };
-};
+
+    getWinner() {
+        if (!this.isGameOver()) return null;
+        return this.computerBoard.allShipsSunk() ? 'Player' : 'Computer';
+    }
+}
