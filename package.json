@@ -1,0 +1,29 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "description": "Classic Battleship game implementation using TDD",
+  "type": "module",
+  "main": "ui/index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "python3 -m http.server --directory public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bit2swaz/battleship.git"
+  },
+  "keywords": ["battleship", "game", "tdd"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bit2swaz/battleship/issues"
+  },
+  "homepage": "https://github.com/bit2swaz/battleship#readme",
+  "devDependencies": {
+    "@babel/core": "^7.27.4",
+    "@babel/plugin-transform-modules-commonjs": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "babel-jest": "^30.0.0-beta.3",
+    "jest": "^29.7.0"
+  }
+}
